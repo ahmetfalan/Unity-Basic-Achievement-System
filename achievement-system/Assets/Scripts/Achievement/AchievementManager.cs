@@ -30,7 +30,7 @@ public class AchievementManager: Observer
                 return;
             else
             {
-                PopUpManager.Instance.Open(v1.ToString(), v2.ToString(), 3f);
+                PopUpManager.Instance.Create(v1.ToString(), v2.ToString(), 3f);
                 PlayerPrefs.SetInt(achievementKey, 1);
                 Debug.Log(achievementKey);
             }
