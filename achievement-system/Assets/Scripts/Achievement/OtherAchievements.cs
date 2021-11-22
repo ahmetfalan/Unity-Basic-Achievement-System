@@ -10,7 +10,7 @@ public class OtherAchievements : Subject
 
     void Update()
     {
-        if (PlayerControl.Instance.rb.velocity.y > 7.0f)
+        if (PlayerControl.Instance.transform.position.y > 4.5f)
         {
             Notify(achievenemtTittle, achievenemtDescription, NotificationType.AchievementUnlocked);
         }

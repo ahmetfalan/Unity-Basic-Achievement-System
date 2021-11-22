@@ -33,7 +33,7 @@ public class PopUp : MonoBehaviour
         Open();
         yield return new WaitForSeconds(Durability);
         Close();
-        yield return new WaitForSeconds(1f);
-        Destroy(this);
+        yield return new WaitForSeconds(0.3f);
+        Destroy(this.gameObject);
     }
 }
