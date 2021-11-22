@@ -1,8 +1,6 @@
-﻿using DG.Tweening;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class PlayerControl : MonoBehaviour
 {
@@ -17,7 +15,7 @@ public class PlayerControl : MonoBehaviour
     public LayerMask whatIsGround;
 
     //combonent variables
-    private Rigidbody2D rb;
+    public Rigidbody2D rb;
 
 
     private void Start()
@@ -34,7 +32,6 @@ public class PlayerControl : MonoBehaviour
         if (Input.GetKeyDown("w") && IsGrounded())
         {
             rb.velocity = new Vector2(rb.velocity.x, playerAttributes.Jump);
-            PopUpManager.Instance.Open("sdadas", "sdasdas", 3f);
         }
     }
 

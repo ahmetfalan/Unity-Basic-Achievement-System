@@ -14,7 +14,7 @@ public class PopUpManager : MonoBehaviour
     [SerializeField] private Image backimg;
     [SerializeField] private float timeRemaining = 5f;
 
-    private void Start()
+    private void Awake()
     {
         Instance = this;
     }
