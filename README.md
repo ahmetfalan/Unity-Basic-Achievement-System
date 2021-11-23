@@ -4,33 +4,36 @@ I made an achievement system using observer pattern inspiration on Jason Weimann
 
 >I'm not very good at explaining like this things, sorry for mistakes.
 
+### Observer Pattern:
+>There is two side in Observer Pattern. One side the Subject(Observable) other one is the Observer. 
+>The most important benefit of the Observer Pattern is that the Subject notifies the Observer when a situation occurs, instead of the Observer constantly observing. 
 
 
-Observer.cs looks like this:
+Observer abstract class looks like this:
 ```c#
 public abstract class Observer: MonoBehaviour
 {
-    public abstract void OnNotify(object v1, object v2, NotificationType notificationType); //making abstract method for overriding calling OnNotify
-    //there is 3 parameter => v1 = tittle of the achievement, v2 = description of the achievement, notificationType = there is one type:AchievementUnlocked
+    public abstract void OnNotify(object v1, object v2, NotificationType notificationType); //Making abstract method for overriding calling OnNotify
+    //there is 3 parameter => v1 = Tittle of the achievement, v2 = Description of the achievement, notificationType = There is one type:AchievementUnlocked
 }
 ```
 
-Subject.cs looks like this:
+Subject abstract class looks like this:
 ```c#
 public abstract class Subject: MonoBehaviour
 {
-    private List<Observer> observers = new List<Observer>(); //creating observer list
+    private List<Observer> observers = new List<Observer>(); //Creating observer list
 
-    public void RegisterObserver(Observer observer) //register observer list
+    public void RegisterObserver(Observer observer) //Register observer list
     {
-        observers.Add(observer);
+        observers.Add(observer); //Track the all observers
     }
 
     public void Notify(object v1, object v2, NotificationType notificationType)
     {
         foreach (var observer in observers)
         {
-            observer.OnNotify(v1, v2, notificationType); //wake up each observer
+            observer.OnNotify(v1, v2, notificationType); //Wake up each observer. We say to observer "hey do your thing"
         }
     }
 }
@@ -38,37 +41,37 @@ public abstract class Subject: MonoBehaviour
 
 AchievementManager.cs looks like this:
 ```c#
-public class AchievementManager: Observer //inheritance from observer
+public class AchievementManager: Observer //Inheritance from Observer abstract class because the overriding
 {
     public static AchievementManager Instance;
 
     private void Start()
     {
         Instance = this;
-        PlayerPrefs.DeleteAll(); //delete all prefs for testing
+        PlayerPrefs.DeleteAll(); //Delete all prefs for testing
 
         foreach (var collectableAchievement in FindObjectsOfType<CollectableAchievements>())
         {
-            collectableAchievement.RegisterObserver(this); //register this object on collectable achievement
+            collectableAchievement.RegisterObserver(this); //Register this object on collectable achievements
         }
 
         foreach (var otherAchievement in FindObjectsOfType<OtherAchievements>())
         {
-            otherAchievement.RegisterObserver(this); //register this object on other achievement
+            otherAchievement.RegisterObserver(this); //Register this object on other achievements
         }
     }
     public override void OnNotify(object v1, object v2, NotificationType notificationType)
     {
-        if (notificationType == NotificationType.AchievementUnlocked) //if incoming type unlocked
+        if (notificationType == NotificationType.AchievementUnlocked) //If incoming type unlocked
         {
-            string achievementKey = "Achievement => " + "Tittle: " + v1 + "----" + "Description: " + v2; //unique key for achievement
-            if (PlayerPrefs.GetInt(achievementKey) == 1) //if already unlocked
+            string achievementKey = "Achievement => " + "Tittle: " + v1 + "----" + "Description: " + v2; //Unique key for achievement
+            if (PlayerPrefs.GetInt(achievementKey) == 1) //If already unlocked
                 return;
             else
             {
-                PopUpManager.Instance.Create(v1.ToString(), v2.ToString(), 3f); //show the popup
-                PlayerPrefs.SetInt(achievementKey, 1); //unlock in prefs
-                Debug.Log(achievementKey); //write the key
+                PopUpManager.Instance.Create(v1.ToString(), v2.ToString(), 3f); //Show the popup
+                PlayerPrefs.SetInt(achievementKey, 1); //Unlock in prefs
+                Debug.Log(achievementKey); //Write the key in console
             }
         }
     }
@@ -77,37 +80,37 @@ public class AchievementManager: Observer //inheritance from observer
 
 CollectableAchievements.cs looks like this:
 ```c#
-public class CollectableAchievements: Subject //inheritance from observer
+public class CollectableAchievements: Subject //Inheritance from Subject abstract class because the overriding
 {
     [SerializeField]
-    private string achievenemtTittle; //tittle of achievement
+    private string achievenemtTittle; //Tittle of achievement
 
     [SerializeField]
-    private string achievenemtDescription; //description of achievement
+    private string achievenemtDescription; //Description of achievement
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Notify(achievenemtTittle, achievenemtDescription, NotificationType.AchievementUnlocked); //notify this achievement
-        Destroy(this.gameObject); //destroy taken object
+        Notify(achievenemtTittle, achievenemtDescription, NotificationType.AchievementUnlocked); //Notify this achievement
+        Destroy(this.gameObject); //Destroy the taken object
     }
 }
 ```
 
-CollectableAchievements.cs looks like this:
+OtherAchievements.cs looks like this:
 ```c#
-public class OtherAchievements : Subject //inheritance from observer
+public class OtherAchievements : Subject //Inheritance from observer
 {
     [SerializeField]
-    private string achievenemtTittle; //tittle of achievement
+    private string achievenemtTittle; //Tittle of achievement
 
     [SerializeField]
-    private string achievenemtDescription; //description of achievement
+    private string achievenemtDescription; //Description of achievement
 
     void Update()
     {
-        if (PlayerControl.Instance.transform.position.y > 4.5f) //if height greater than 4.5
+        if (PlayerControl.Instance.transform.position.y > 4.5f) //If height greater than 4.5
         {
-            Notify(achievenemtTittle, achievenemtDescription, NotificationType.AchievementUnlocked); //notify this achievement
+            Notify(achievenemtTittle, achievenemtDescription, NotificationType.AchievementUnlocked); //Notify this achievement
         }
     }
 }
@@ -117,29 +120,29 @@ PopUp.cs looks like this:
 ```c#
 public class PopUp : MonoBehaviour
 {
-    public Text Tittle; //popup tittle
-    public Text Description; //popup description
-    public Image Img; //popup image
-    public Image BackgroundImg; //popup background image
-    public float Durability = 5f; //popup durability
-    public float CurrentTime = 0f; //popup timer
+    public Text Tittle; //Popup tittle
+    public Text Description; //Popup description
+    public Image Img; //Popup image
+    public Image BackgroundImg; //Popup background image
+    public float Durability = 5f; //Popup durability
+    public float CurrentTime = 0f; //Popup timer
 
     private void Awake()
     {
-        StartCoroutine(OpenAndClose()); //while object creating start timer
+        StartCoroutine(OpenAndClose()); //While object creating start timer
     }
 
     private void Open()
     {
-        this.transform.DOMoveY(500.0f, 0.5f).SetEase(Ease.InBack); //open the popup window
+        this.transform.DOMoveY(500.0f, 0.5f).SetEase(Ease.InBack); //Open the popup window
     }
 
-    private void Close() //close the popup window
+    private void Close() //Close the popup window
     {
         this.transform.DOMoveY(800.0f, 0.5f).SetEase(Ease.InBack);
     }
 
-    IEnumerator OpenAndClose() //wait on the screen
+    IEnumerator OpenAndClose() //Wait on the screen
     {
         yield return new WaitForSeconds(0.1f);
         Open();
@@ -151,13 +154,13 @@ public class PopUp : MonoBehaviour
 }
 ```
 
-PopUp.cs looks like this:
+PopUpManager.cs looks like this:
 ```c#
 public class PopUpManager : MonoBehaviour
 {
-    public static PopUpManager Instance; //get instance popup manager
+    public static PopUpManager Instance; //Get instance popup manager
 
-    public PopUp popUp; //
+    public PopUp popUp; //The popup object
     public GameObject canvas;
 
  
@@ -166,7 +169,7 @@ public class PopUpManager : MonoBehaviour
         Instance = this;
     }
 
-    public void Create(string tittle, string description, float durability) //create the popup window and equal the all values
+    public void Create(string tittle, string description, float durability) //Create the popup window and equal the all values
     {
         GameObject panel = Instantiate(popUp.gameObject, new Vector2(transform.position.x, 800), Quaternion.identity);
         panel.transform.SetParent(canvas.transform);
