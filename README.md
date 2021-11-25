@@ -8,16 +8,25 @@ I made an achievement system using observer pattern inspiration on Jason Weimann
 >There is two side in Observer Pattern. One side the Subject(Observable) other one is the Observer. 
 >The most important benefit of the Observer Pattern is that the Subject notifies the Observer when a situation occurs, instead of the Observer constantly observing. 
 
+[Achievement Sprites](https://duct-team.itch.io/black-and-white-achievements-pack?download)
+
+## PopUP
+![PopUp](https://github.com/ahmetfalan/Unity-Basic-Achievement-System/blob/main/imgs/PopUp.png)
+
+## Scriptable Object
+![Saving Scriptable Object](https://github.com/ahmetfalan/Unity-Basic-Achievement-System/blob/main/imgs/ScriptableAchievement.png)
+
+## Editor
+![Editor](https://github.com/ahmetfalan/Unity-Basic-Achievement-System/blob/main/imgs/Editor.png)
 
 Observer abstract class looks like this:
 ```c#
 public abstract class Observer: MonoBehaviour
 {
-    public abstract void OnNotify(object v1, object v2, NotificationType notificationType); //Making abstract method for overriding calling OnNotify
-    //there is 3 parameter => v1 = Tittle of the achievement, v2 = Description of the achievement, notificationType = There is one type:AchievementUnlocked
+    public abstract void OnNotify(int ID); //Making abstract method for overriding, id parameter for to indicate which object it is
 }
 ```
-
+# Explanin Codes:
 Subject abstract class looks like this:
 ```c#
 public abstract class Subject: MonoBehaviour
@@ -29,11 +38,11 @@ public abstract class Subject: MonoBehaviour
         observers.Add(observer); //Track the all observers
     }
 
-    public void Notify(object v1, object v2, NotificationType notificationType)
+    public void Notify(int ID)
     {
         foreach (var observer in observers)
         {
-            observer.OnNotify(v1, v2, notificationType); //Wake up each observer. We say to observer "Hey do your thing"
+            observer.OnNotify(ID); //Wake up the observer. We say to observer "Hey do your thing"
         }
     }
 }
@@ -41,38 +50,99 @@ public abstract class Subject: MonoBehaviour
 
 AchievementManager.cs looks like this:
 ```c#
-public class AchievementManager: Observer //Inheritance from Observer abstract class because the overriding
+
+public class AchievementManager : Observer
 {
     public static AchievementManager Instance;
 
+    public AchievementList achievementList;
+
+    public GameObject achievementPanel; //Content
+    public GameObject achievementImage; //Achievement Sprite
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this; //Get instance
+        }
+        else
+        {
+            Destroy(this.gameObject);
+        }
+    }
+
     private void Start()
     {
-        Instance = this;
-        PlayerPrefs.DeleteAll(); //Delete all prefs for testing
-
         foreach (var collectableAchievement in FindObjectsOfType<CollectableAchievements>())
         {
-            collectableAchievement.RegisterObserver(this); //Register this object on collectable achievements
+            collectableAchievement.RegisterObserver(this); //Register each Collectable Achievement
         }
 
         foreach (var otherAchievement in FindObjectsOfType<OtherAchievements>())
         {
-            otherAchievement.RegisterObserver(this); //Register this object on other achievements
+            otherAchievement.RegisterObserver(this); //Register each Other Achievement
+        }
+
+        LoadData(); //Load data for achievement panel
+    }
+
+    GameObject gameObject;
+    public void LoadData() //Instantiate each achievement
+    {
+        foreach (var achievement in achievementList.achievements)
+        {
+            gameObject = Instantiate(achievementImage, achievementPanel.transform, achievementPanel.transform);
+            gameObject.transform.SetParent(achievementPanel.transform);
+            gameObject.transform.GetChild(0).GetComponent<Image>().sprite = achievement.BackgroundImg;
+            gameObject.transform.GetChild(1).GetComponent<Image>().sprite = achievement.Img;
+
+            gameObject.GetComponent<Achievement>().ID = achievement.ID;
+
+            Color alp = gameObject.transform.GetChild(1).GetComponent<Image>().color;
+            alp.a = 0.1f;
+
+            if (!achievement.Unlocked)
+                gameObject.transform.GetChild(1).GetComponent<Image>().color = alp;
         }
     }
-    public override void OnNotify(object v1, object v2, NotificationType notificationType) //Override on OnNotify method
+
+    public void UpdateAlp(int ID) //Update achievement alpha when unlock the achievement 
     {
-        if (notificationType == NotificationType.AchievementUnlocked) //If incoming type unlocked
+        foreach (var achievenent in FindObjectsOfType<Achievement>())
         {
-            string achievementKey = "Achievement => " + "Tittle: " + v1 + "----" + "Description: " + v2; //Unique key for achievement
-            if (PlayerPrefs.GetInt(achievementKey) == 1) //If already unlocked
-                return;
-            else
+            if (ID == achievenent.ID)
             {
-                PopUpManager.Instance.Create(v1.ToString(), v2.ToString(), 3f); //Show the popup
-                PlayerPrefs.SetInt(achievementKey, 1); //Unlock in prefs
-                Debug.Log(achievementKey); //Write the key in console
+                Color alp = achievenent.gameObject.transform.GetChild(1).GetComponent<Image>().color;
+                alp.a = 1f;
+                achievenent.gameObject.transform.GetChild(1).GetComponent<Image>().color = alp;
             }
+        }
+    }
+
+    public bool UnlockAchievement(int ID) //Unlock achievement
+    {
+        achievementList.achievements[ID].Unlocked = true;
+        UpdateAlp(ID);
+        return true;
+    }
+
+    public bool CanAchievementBeUnlocked(int ID) //Check the achievement is unlocked
+    {
+        bool canUnlock = true;
+        if (achievementList.achievements[ID].Unlocked)
+        {
+            canUnlock = false;
+        }
+        return canUnlock;
+    }
+
+    public override void OnNotify(int ID) //Do this wwhen achievement unlocked
+    {
+        if (CanAchievementBeUnlocked(ID))
+        {
+            PopUpManager.Instance.Create(achievementList.achievements[ID].Tittle, achievementList.achievements[ID].Description, 3f);
+            UnlockAchievement(ID);
         }
     }
 }
@@ -83,14 +153,11 @@ CollectableAchievements.cs looks like this:
 public class CollectableAchievements: Subject //Inheritance from Subject abstract class because the overriding
 {
     [SerializeField]
-    private string achievenemtTittle; //Tittle of achievement
-
-    [SerializeField]
-    private string achievenemtDescription; //Description of achievement
+    private int ID; Send the achievement id for unlocked
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Notify(achievenemtTittle, achievenemtDescription, NotificationType.AchievementUnlocked); //Notify this achievement
+        Notify(ID); //Notify this achievement
         Destroy(this.gameObject); //Destroy the taken object
     }
 }
@@ -100,17 +167,11 @@ OtherAchievements.cs looks like this:
 ```c#
 public class OtherAchievements : Subject //Inheritance from subject
 {
-    [SerializeField]
-    private string achievenemtTittle; //Tittle of achievement
-
-    [SerializeField]
-    private string achievenemtDescription; //Description of achievement
-
     void Update()
     {
         if (PlayerControl.Instance.transform.position.y > 4.5f) //If height greater than 4.5
         {
-            Notify(achievenemtTittle, achievenemtDescription, NotificationType.AchievementUnlocked); //Notify this achievement
+            Notify(0); //Notify this achievement
         }
     }
 }
