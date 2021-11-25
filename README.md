@@ -19,6 +19,7 @@ I made an achievement system using observer pattern inspiration on Jason Weimann
 ## Editor
 ![Editor](https://github.com/ahmetfalan/Unity-Basic-Achievement-System/blob/main/imgs/Editor.png)
 
+# Explaining Codes:
 Observer abstract class looks like this:
 ```c#
 public abstract class Observer: MonoBehaviour
@@ -26,7 +27,7 @@ public abstract class Observer: MonoBehaviour
     public abstract void OnNotify(int ID); //Making abstract method for overriding, id parameter for to indicate which object it is
 }
 ```
-# Explanin Codes:
+
 Subject abstract class looks like this:
 ```c#
 public abstract class Subject: MonoBehaviour
