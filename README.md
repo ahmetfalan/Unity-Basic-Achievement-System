@@ -10,7 +10,7 @@ I made an achievement system using observer pattern inspiration on Jason Weimann
 
 [Achievement Sprites](https://duct-team.itch.io/black-and-white-achievements-pack?download)
 
-## PopUP
+## PopUp
 ![PopUp](https://github.com/ahmetfalan/Unity-Basic-Achievement-System/blob/main/imgs/PopUp.png)
 
 ## Scriptable Object
