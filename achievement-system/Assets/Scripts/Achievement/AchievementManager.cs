@@ -5,7 +5,6 @@ public class AchievementManager : Observer
 {
     public static AchievementManager Instance;
 
-    string path = "Assets/Scripts/Data/Achievements.json";
     public AchievementList achievementList;
 
     public GameObject achievementPanel;
@@ -25,7 +24,6 @@ public class AchievementManager : Observer
 
     private void Start()
     {
-        PlayerPrefs.DeleteAll();
         foreach (var collectableAchievement in FindObjectsOfType<CollectableAchievements>())
         {
             collectableAchievement.RegisterObserver(this);
@@ -78,6 +76,7 @@ public class AchievementManager : Observer
         UpdateAlp(ID);
         return true;
     }
+
     public bool CanAchievementBeUnlocked(int ID)
     {
         bool canUnlock = true;
@@ -87,6 +86,7 @@ public class AchievementManager : Observer
         }
         return canUnlock;
     }
+
     public override void OnNotify(int ID)
     {
         if (CanAchievementBeUnlocked(ID))
