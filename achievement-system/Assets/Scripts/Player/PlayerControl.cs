@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using DG.Tweening;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,9 +16,9 @@ public class PlayerControl : MonoBehaviour
     public LayerMask whatIsGround;
 
     //combonent variables
-    public Rigidbody2D rb;
+    private Rigidbody2D rb;
 
-
+    public GameObject achievementPanel;
     private void Start()
     {
         Instance = this;
@@ -32,6 +33,15 @@ public class PlayerControl : MonoBehaviour
         if (Input.GetKeyDown("w") && IsGrounded())
         {
             rb.velocity = new Vector2(rb.velocity.x, playerAttributes.Jump);
+        }
+
+        if (Input.GetKeyDown("e"))
+        {
+            achievementPanel.transform.DOMoveY(300.0f, 0.5f).SetEase(Ease.InBack);
+        }
+        if (Input.GetKeyUp("e"))
+        {
+            achievementPanel.transform.DOMoveY(1200.0f, 0.5f).SetEase(Ease.InBack);
         }
     }
 

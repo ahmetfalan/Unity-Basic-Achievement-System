@@ -3,14 +3,11 @@
 public class CollectableAchievements: Subject
 {
     [SerializeField]
-    private string achievenemtTittle;
-
-    [SerializeField]
-    private string achievenemtDescription;
+    private int ID;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Notify(achievenemtTittle, achievenemtDescription, NotificationType.AchievementUnlocked);
+        Notify(ID);
         Destroy(this.gameObject);
     }
 }

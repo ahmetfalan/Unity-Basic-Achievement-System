@@ -25,6 +25,5 @@ public class PopUpManager : MonoBehaviour
         panel.transform.GetComponent<PopUp>().Description.text = description;
         panel.transform.GetComponent<PopUp>().Durability = durability;
     }
-
 }
 

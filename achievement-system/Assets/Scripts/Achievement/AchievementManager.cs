@@ -1,16 +1,31 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class AchievementManager: Observer
+public class AchievementManager : Observer
 {
     public static AchievementManager Instance;
 
+    string path = "Assets/Scripts/Data/Achievements.json";
+    public AchievementList achievementList;
+
+    public GameObject achievementPanel;
+    public GameObject achievementImage;
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(this.gameObject);
+        }
+    }
+
     private void Start()
     {
-        Instance = this;
         PlayerPrefs.DeleteAll();
-
         foreach (var collectableAchievement in FindObjectsOfType<CollectableAchievements>())
         {
             collectableAchievement.RegisterObserver(this);
@@ -20,20 +35,64 @@ public class AchievementManager: Observer
         {
             otherAchievement.RegisterObserver(this);
         }
+
+        LoadData();
     }
-    public override void OnNotify(object v1, object v2, NotificationType notificationType)
+
+    GameObject gameObject;
+    public void LoadData()
     {
-        if (notificationType == NotificationType.AchievementUnlocked)
+        foreach (var achievement in achievementList.achievements)
         {
-            string achievementKey = "Achievement => " + "Tittle: " + v1 + "----" + "Description: " + v2;
-            if (PlayerPrefs.GetInt(achievementKey) == 1)
-                return;
-            else
+            gameObject = Instantiate(achievementImage, achievementPanel.transform, achievementPanel.transform);
+            gameObject.transform.SetParent(achievementPanel.transform);
+            gameObject.transform.GetChild(0).GetComponent<Image>().sprite = achievement.BackgroundImg;
+            gameObject.transform.GetChild(1).GetComponent<Image>().sprite = achievement.Img;
+
+            gameObject.GetComponent<Achievement>().ID = achievement.ID;
+
+            Color alp = gameObject.transform.GetChild(1).GetComponent<Image>().color;
+            alp.a = 0.1f;
+
+            if (!achievement.Unlocked)
+                gameObject.transform.GetChild(1).GetComponent<Image>().color = alp;
+        }
+    }
+
+    public void UpdateAlp(int ID)
+    {
+        foreach (var achievenent in FindObjectsOfType<Achievement>())
+        {
+            if (ID == achievenent.ID)
             {
-                PopUpManager.Instance.Create(v1.ToString(), v2.ToString(), 3f);
-                PlayerPrefs.SetInt(achievementKey, 1);
-                Debug.Log(achievementKey);
+                Color alp = achievenent.gameObject.transform.GetChild(1).GetComponent<Image>().color;
+                alp.a = 1f;
+                achievenent.gameObject.transform.GetChild(1).GetComponent<Image>().color = alp;
             }
+        }
+    }
+
+    public bool UnlockAchievement(int ID)
+    {
+        achievementList.achievements[ID].Unlocked = true;
+        UpdateAlp(ID);
+        return true;
+    }
+    public bool CanAchievementBeUnlocked(int ID)
+    {
+        bool canUnlock = true;
+        if (achievementList.achievements[ID].Unlocked)
+        {
+            canUnlock = false;
+        }
+        return canUnlock;
+    }
+    public override void OnNotify(int ID)
+    {
+        if (CanAchievementBeUnlocked(ID))
+        {
+            PopUpManager.Instance.Create(achievementList.achievements[ID].Tittle, achievementList.achievements[ID].Description, 3f);
+            UnlockAchievement(ID);
         }
     }
 }
