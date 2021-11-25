@@ -33,7 +33,7 @@ public abstract class Subject: MonoBehaviour
     {
         foreach (var observer in observers)
         {
-            observer.OnNotify(v1, v2, notificationType); //Wake up each observer. We say to observer "hey do your thing"
+            observer.OnNotify(v1, v2, notificationType); //Wake up each observer. We say to observer "Hey do your thing"
         }
     }
 }
@@ -60,7 +60,7 @@ public class AchievementManager: Observer //Inheritance from Observer abstract c
             otherAchievement.RegisterObserver(this); //Register this object on other achievements
         }
     }
-    public override void OnNotify(object v1, object v2, NotificationType notificationType)
+    public override void OnNotify(object v1, object v2, NotificationType notificationType) //Override on OnNotify method
     {
         if (notificationType == NotificationType.AchievementUnlocked) //If incoming type unlocked
         {
@@ -98,7 +98,7 @@ public class CollectableAchievements: Subject //Inheritance from Subject abstrac
 
 OtherAchievements.cs looks like this:
 ```c#
-public class OtherAchievements : Subject //Inheritance from observer
+public class OtherAchievements : Subject //Inheritance from subject
 {
     [SerializeField]
     private string achievenemtTittle; //Tittle of achievement
